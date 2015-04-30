@@ -3,8 +3,8 @@ from flask.templating import render_template
 
 application = flask.Flask(__name__)
 
-@application.route('/')
-@application.route('/service-request')
+@application.route('/',methods=['POST'])
+@application.route('/service-request',methods=['POST'])
 def hello_world():
     application.logger.warning('The request is in')
     return "Request handled."
