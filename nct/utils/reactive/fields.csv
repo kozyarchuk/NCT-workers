@@ -1,0 +1,9 @@
+name,datatype,calculation_method,validation_method,domain_mapping
+action,str,,must_be_provided,Trade.action
+quantity,Decimal,,must_be_provided,Trade.quantity
+price,Decimal,,must_be_provided,Trade.price
+trade_date,datetime.date,,must_be_provided,Trade.trade_date
+currency,str,,must_be_provided,Trade.currency
+calendar,str,calc_calendar,,
+settle_date,datetime.date,calc_settle_date,must_be_provided,Trade.settle_date
+commission,Decimal,calc_commission,must_be_provided,
