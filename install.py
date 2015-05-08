@@ -1,8 +1,7 @@
-#!/usr/bin/python
-from nct.utils.alch import build_schema
+from nct.deploy.deploy import  Deployer
 
 if __name__ == '__main__':
     print ( "Install Starting" )
-    build_schema()
+    Deployer.deploy()
     print ( "Install Complete" )
 

@@ -1,5 +1,6 @@
 from nct.domain.base import Base
 from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class Portfolio(Base):
@@ -14,6 +15,11 @@ class Portfolio(Base):
     category_1  = Column( String(255))
     category_2  = Column( String(255))
     category_3  = Column( String(255))
+
+    trader  = relationship("Entity",foreign_keys="[Portfolio.trader_id]")
+    broker  = relationship("Entity",foreign_keys="[Portfolio.broker_id]")
+    analyst  = relationship("Entity",foreign_keys="[Portfolio.analyst_id]")
+    clearer  = relationship("Entity",foreign_keys="[Portfolio.clearer_id]")
 
 
 
