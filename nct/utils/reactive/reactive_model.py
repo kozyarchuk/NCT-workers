@@ -1,13 +1,20 @@
 from nct.utils.reactive.bound_field import BoundField
 from nct.utils.reactive.field_factory import FieldFactory
-class ReactiveModel(object):
+from nct.utils.alch import Session
+
+class ReactiveModel:
     INSTRUMENT = 'Instrument'
     TRADE = 'Trade'
+    PORTFOLIO = 'Portfolio'
     FIELD_DEPENDS = { }
 
     def __init__(self):
+        self.s = Session()
         self._domain_objects = self._init_domain_objects()
-    
+
+    def __del__(self):
+        self.s.close()
+        
     def _init_domain_objects(self):
         return {}
     

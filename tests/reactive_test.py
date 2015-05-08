@@ -5,7 +5,6 @@ from decimal import Decimal
 import datetime
 from nct.utils.reactive.bound_field import BoundField, InvalidModelError,\
     InvalidFieldDefinitionlError
-from nct.utils.reactive.framework import ReactiveFramework
 
 class FieldTest(unittest.TestCase):
 
@@ -36,7 +35,7 @@ class FieldTest(unittest.TestCase):
         self.assertEquals(str, f.datatype)
         self.assertEquals(None, f.calculation_method)
         self.assertEquals('must_be_provided', f.validation_method)
-        self.assertEquals('Trade.action', f.domain_mapping)
+        self.assertEquals('map_trade_action', f.domain_mapping)
 
     def test_field_factory_loads_trade_date(self):
         f = FieldFactory.get_field('trade_date')

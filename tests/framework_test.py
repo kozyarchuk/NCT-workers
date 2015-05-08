@@ -28,6 +28,15 @@ class StubModel(ReactiveModel):
     def calc_settle_date(self):
         return date(2015,2,2)
     
+    def calc_currency(self):
+        pass
+    
+    def map_currency(self, field, direction):
+        if direction == field.TO:
+            self.get_domain_object(self.TRADE).currency = field.value
+        else:
+            return self.get_domain_object(self.TRADE).currency
+    
     def save(self):
         self.save_called =True
     

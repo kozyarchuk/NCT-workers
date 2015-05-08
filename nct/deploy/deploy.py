@@ -1,6 +1,6 @@
 from __future__ import print_function    # (at top of module)
 from nct.domain import Base
-from nct.utils.alch import engine, session_scope
+from nct.utils.alch import engine, session_scope, Session
 from nct.domain.choicelist import ChoiceList
 from nct.domain.entity import Entity
 from nct.domain.instrument import Instrument
@@ -26,8 +26,9 @@ class Deployer:
     @classmethod
     @log_decorator
     def update_schema(cls):
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
+        engine  = Session().get_bind()
+        Base.metadata.drop_all( engine )
+        Base.metadata.create_all( engine )
         
     @classmethod
     @log_decorator
@@ -42,6 +43,7 @@ class Deployer:
             s.add(ChoiceList(list_name="EntityType", value="Analyst"))
             s.add(ChoiceList(list_name="EntityType", value="Broker"))
             s.add(ChoiceList(list_name="EntityType", value="Clearer"))
+            s.add(ChoiceList(list_name="EntityType", value="Fund"))
 
     @classmethod
     @log_decorator
@@ -55,6 +57,8 @@ class Deployer:
                          type =ChoiceList.find_by_name(s, "EntityType", "Trader")))
             s.add(Entity(name = 'Analyst1', description = 'Demo Analyst', 
                          type =ChoiceList.find_by_name(s, "EntityType", "Analyst")))
+            s.add(Entity(name = 'Fund1', description = 'Demo Analyst', 
+                         type =ChoiceList.find_by_name(s, "EntityType", "Fund")))
 
     @classmethod
     @log_decorator
@@ -81,45 +85,10 @@ class Deployer:
             s.add(Instrument(name = 'GOOG150508P00530000', ins_type = opt_type, 
                              currency = usd, underlying = googl, exp_date = date(2015,5,8)))
 
-
-    @classmethod
-    @log_decorator
-    def create_portfolios(cls):
-        def permutize(x):
-            if x:
-                first = x[0]
-                rest = x[1:]
-                res = []
-                for i in first:
-                    res.extend( [[i] + j for j in permutize(rest) ] )
-                return res
-            else:
-                return [[]]
-
-        with session_scope() as s:
-            broker1 = s.query(Entity).filter_by(name ='Broker1').one()
-            clearer1 = s.query(Entity).filter_by(name ='Clearer1').one()
-            trader1 = s.query(Entity).filter_by(name ='Trader1').one()
-            analyst1 = s.query(Entity).filter_by(name ='Analyst1').one()
-            brokers = [None, broker1]
-            clearers = [None, clearer1]
-            traders = [None, trader1]
-            analysts = [None, analyst1]
-            categories = ['', 'cat1']
-            perms = permutize([brokers, clearers, traders, analysts,categories,categories,categories])
-            counter = 1
-            for broker, clearer, trader, analyst,cat1,cat2,cat3 in perms:
-                s.add(Portfolio(description = 'Port %i'%counter, trader = trader,
-                                analyst = analyst, broker = broker, clearer =  clearer ,
-                                category_1 = cat1, category_2 = cat2, category_3 = cat3))
-                counter +=1
-
-
     @classmethod
     def update_data(cls):
         cls.create_choice_lists()
         cls.create_entities()
         cls.create_instruments()
-#         cls.create_portfolios()
     
         

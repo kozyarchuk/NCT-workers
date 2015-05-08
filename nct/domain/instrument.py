@@ -15,3 +15,7 @@ class Instrument(Base):
     currency    = relationship("Instrument", remote_side=[id], foreign_keys="[Instrument.currency_id]", post_update=True)
     underlying  = relationship("Instrument",remote_side=[id], foreign_keys="[Instrument.underlying_id]")
 
+    @classmethod
+    def find(cls, s, name):
+        return s.query(cls).filter_by(name=name).one()
+

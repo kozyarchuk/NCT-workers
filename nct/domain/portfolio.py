@@ -12,14 +12,15 @@ class Portfolio(Base):
     analyst_id  = Column( Integer, ForeignKey('entity.id'))
     broker_id   = Column( Integer, ForeignKey('entity.id'))
     clearer_id  = Column( Integer, ForeignKey('entity.id'))
-    category_1  = Column( String(255))
-    category_2  = Column( String(255))
-    category_3  = Column( String(255))
+    fund_id     = Column( Integer, ForeignKey('entity.id'))
+    strategy    = Column( String(255))
+    sector      = Column( String(255))
 
     trader  = relationship("Entity",foreign_keys="[Portfolio.trader_id]")
     broker  = relationship("Entity",foreign_keys="[Portfolio.broker_id]")
-    analyst  = relationship("Entity",foreign_keys="[Portfolio.analyst_id]")
-    clearer  = relationship("Entity",foreign_keys="[Portfolio.clearer_id]")
+    analyst = relationship("Entity",foreign_keys="[Portfolio.analyst_id]")
+    clearer = relationship("Entity",foreign_keys="[Portfolio.clearer_id]")
+    fund    = relationship("Entity",foreign_keys="[Portfolio.fund_id]")
 
 
 
