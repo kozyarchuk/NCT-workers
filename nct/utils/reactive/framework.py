@@ -74,3 +74,5 @@ class ReactiveFramework:
         for field in self.get_fields():
             field.has_user_entered_value = False
                 
+    def delete(self):
+        self.model.delete()

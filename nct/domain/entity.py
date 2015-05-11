@@ -14,6 +14,6 @@ class Entity(Base):
 
     @classmethod
     def find(cls, s, type_name, name):
-        type_ = ChoiceList.find_by_name(s, 'EntityType', type_name)
+        type_ = ChoiceList.find(s, 'EntityType', type_name)
         return s.query(cls).filter_by(name=name, type=type_).one()
 

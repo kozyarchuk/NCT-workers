@@ -9,5 +9,5 @@ class ChoiceList(Base):
     value       = Column( String(255))
     
     @classmethod
-    def find_by_name(cls,s, list_name, value):
+    def find(cls,s, list_name, value):
         return s.query(ChoiceList).filter_by(list_name = list_name, value = value).one()

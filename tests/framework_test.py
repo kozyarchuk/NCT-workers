@@ -42,6 +42,9 @@ class StubModel(ReactiveModel):
     
     def load(self, trade_id):
         self.load_called = trade_id
+    
+    def delete(self):
+        self.delete_called = True
 
 class FrameWorkTest(unittest.TestCase):
     
@@ -134,4 +137,8 @@ class FrameWorkTest(unittest.TestCase):
         
         for field in rf.get_fields():
             self.assertEquals(False, field.has_user_entered_value)
-        
+
+    def test_delete(self):
+        rf = ReactiveFramework(StubModel())
+        rf.delete()
+        self.assertEqual(True, rf.model.delete_called)

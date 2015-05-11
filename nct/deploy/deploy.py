@@ -50,24 +50,26 @@ class Deployer:
     def create_entities(cls):
         with session_scope() as s:
             s.add(Entity(name = 'Clearer1', description = 'Demo Clearer', 
-                         type =ChoiceList.find_by_name(s, "EntityType", "Clearer")))
+                         type =ChoiceList.find(s, "EntityType", "Clearer")))
             s.add(Entity(name = 'Broker1', description = 'Demo Broker', 
-                         type =ChoiceList.find_by_name(s, "EntityType", "Broker")))
+                         type =ChoiceList.find(s, "EntityType", "Broker")))
             s.add(Entity(name = 'Trader1', description = 'Demo Trader', 
-                         type =ChoiceList.find_by_name(s, "EntityType", "Trader")))
+                         type =ChoiceList.find(s, "EntityType", "Trader")))
             s.add(Entity(name = 'Analyst1', description = 'Demo Analyst', 
-                         type =ChoiceList.find_by_name(s, "EntityType", "Analyst")))
+                         type =ChoiceList.find(s, "EntityType", "Analyst")))
             s.add(Entity(name = 'Fund1', description = 'Demo Analyst', 
-                         type =ChoiceList.find_by_name(s, "EntityType", "Fund")))
+                         type =ChoiceList.find(s, "EntityType", "Fund")))
+            s.add(Entity(name = 'Fund2', description = 'Demo Analyst', 
+                         type =ChoiceList.find(s, "EntityType", "Fund")))
 
     @classmethod
     @log_decorator
     def create_instruments(cls):
         with session_scope() as s:
-            usd     = Instrument(name = 'USD', ins_type = ChoiceList.find_by_name(s, "InsType", "Currency") )
+            usd     = Instrument(name = 'USD', ins_type = ChoiceList.find(s, "InsType", "Currency") )
             usd.currency = usd
             s.add(usd)
-            eqtype = ChoiceList.find_by_name(s, "InsType", "Equity")
+            eqtype = ChoiceList.find(s, "InsType", "Equity")
             googl   = Instrument(name = 'GOOGL.O', ins_type = eqtype, currency = usd )
             s.add(googl)
             s.add(Instrument(name = 'TWTR.N', ins_type = eqtype, currency = usd ))
@@ -75,7 +77,7 @@ class Deployer:
             s.add(Instrument(name = 'BAC.N', ins_type = eqtype, currency = usd ))
             s.add(Instrument(name = 'IBM.N', ins_type = eqtype, currency = usd ))
 
-            opt_type = ChoiceList.find_by_name(s, "InsType", "Option")
+            opt_type = ChoiceList.find(s, "InsType", "Option")
             s.add(Instrument(name = 'GOOG150508C00540000', ins_type = opt_type, 
                              currency = usd, underlying = googl, exp_date = date(2015,5,8)))
             s.add(Instrument(name = 'GOOG150508C00542500', ins_type = opt_type, 

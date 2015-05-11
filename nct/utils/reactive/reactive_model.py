@@ -28,3 +28,11 @@ class ReactiveModel:
     def must_be_provided(self, field):
         return None if field.has_value else 'Not set'
 
+    def  _commit(self):
+        try:
+            self.s.commit()
+            return self._trade.id
+        except:
+            self.s.rollback()
+            raise
+        
