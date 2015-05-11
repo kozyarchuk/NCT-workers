@@ -16,7 +16,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
     def test_load_empty_trade_file_produces_empty_result(self):
         csv_items = []
         
-        result = BulkTradeLoader().load(csv_items)
+        result = BulkTradeLoader(csv_items).load()
         self.assertEquals(0, result.total)
         self.assertEquals(0, result.loaded)
         self.assertEquals(0, result.errors)
@@ -27,7 +27,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
         
         input_rec = dict(quantity=100, price = 123)
         csv_items = [input_rec]
-        result = BulkTradeLoader().load(csv_items)
+        result = BulkTradeLoader(csv_items).load()
         self.assertEquals(1, result.total)
         self.assertEquals(0, result.loaded)
         self.assertEquals(1, result.errors)
@@ -93,7 +93,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
                 "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla"}
 
         csv_items = [rec1, rec2, rec3, rec4]
-        result = BulkTradeLoader().load(csv_items)
+        result = BulkTradeLoader(csv_items).load()
         self.assertEquals(4, result.total)
         self.assertEquals(2, result.loaded)
         self.assertEquals(1, result.errors)

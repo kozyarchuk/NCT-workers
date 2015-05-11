@@ -2,7 +2,7 @@ from nct.utils.reactive.framework import ReactiveFramework
 from nct.presentation.vanilla import VanillaModel
 
 class BulkTradeLoadStatus:
-
+    STATUS_FIELD = 'Status'
     def __init__(self):
         self.total = 0
         self.loaded = 0
@@ -11,7 +11,7 @@ class BulkTradeLoadStatus:
         self.rejected_trades = []
         
     def _add_reject(self, message, record):
-        record['Status'] = message
+        record[self.STATUS_FIELD] = message
         self.rejected_trades.append(record)
 
     def add_error(self, message, record):
@@ -90,9 +90,13 @@ class RecordProcessor:
         
 class BulkTradeLoader:
 
-    def load(self, records):
+    def __init__(self, records):
+        self.records = records
+        
+        
+    def load(self):
         status =  BulkTradeLoadStatus()
-        for record in records:
+        for record in self.records:
             rp = RecordProcessor(record)
             status.add_total()
             try:
