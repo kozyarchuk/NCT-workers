@@ -5,6 +5,7 @@ from decimal import Decimal
 import datetime
 from nct.utils.reactive.bound_field import BoundField, InvalidModelError,\
     InvalidFieldDefinitionlError
+from datetime import date
 
 class FieldTest(unittest.TestCase):
 
@@ -47,6 +48,8 @@ class FieldTest(unittest.TestCase):
 
     def test_field_factory_missing_field(self):
         self.assertRaisesRegex(InvalidFieldDefinitionlError, 'invalid_field is not a valid field', FieldFactory.get_field, 'invalid_field')
+
+
     
     
 class StubModel(object):
@@ -199,6 +202,18 @@ class BoundFieldTest(unittest.TestCase):
         bf.set_value("456")
         bf.map_from_domain()
         self.assertEqual(Decimal("456"), bf.value)
+
+    def test_set_date_fields_as_date(self):
+        f = Field(name="f1",  datatype=datetime.date )
+        bf = BoundField(f , StubModel())
+        bf.set_value(date(2015,1,1))
+        self.assertEquals(date(2015,1,1), bf.value)
+        
+    def test_set_date_fields_as_string(self):
+        f = Field(name="f1",  datatype=datetime.date )
+        bf = BoundField(f , StubModel())
+        bf.set_value("2015-01-02")
+        self.assertEquals(date(2015,1,2), bf.value)
 
 
 

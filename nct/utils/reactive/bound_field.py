@@ -1,6 +1,9 @@
+from datetime import date, datetime
 import inspect
 from nct.utils.reactive.common import InvalidModelError,\
     InvalidFieldDefinitionlError
+
+DATATYPE_CONVERTERS = {(str,date):lambda value: datetime.strptime(value, "%Y-%m-%d").date()}
 
 class BoundField:
     TO = 'TO'
@@ -36,7 +39,8 @@ class BoundField:
             self.has_user_entered_value = False
         else:  
             if not isinstance(value, self.definition.datatype):
-                self.value = self.definition.datatype(value)
+                converter = DATATYPE_CONVERTERS.get((type(value),self.definition.datatype), self.definition.datatype )
+                self.value = converter(value)
             else:
                 self.value =  value
                 
