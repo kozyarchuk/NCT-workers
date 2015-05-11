@@ -20,3 +20,6 @@ class Trade(Base):
     action      = relationship("ChoiceList",foreign_keys="[Trade.action_id]")
     currency    = relationship("Instrument",foreign_keys="[Trade.currency_id]")
     portfolio   = relationship("Portfolio",foreign_keys="[Trade.portfolio_id]")
+
+
+

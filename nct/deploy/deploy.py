@@ -1,11 +1,10 @@
 from __future__ import print_function    # (at top of module)
 from nct.domain import Base
-from nct.utils.alch import engine, session_scope, Session
+from nct.utils.alch import session_scope, Session
 from nct.domain.choicelist import ChoiceList
 from nct.domain.entity import Entity
 from nct.domain.instrument import Instrument
 from datetime import date
-from nct.domain.portfolio import Portfolio
 
 
 def log_decorator(func):

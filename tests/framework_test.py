@@ -31,7 +31,7 @@ class StubModel(ReactiveModel):
     def calc_currency(self):
         pass
     
-    def map_currency(self, field, direction):
+    def map_instrument(self, field, direction):
         if direction == field.TO:
             self.get_domain_object(self.TRADE).currency = field.value
         else:

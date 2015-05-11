@@ -39,32 +39,50 @@ class VanillaModel(ReactiveModel):
     def calc_currency(self):
         return Instrument.find(self.s, self.instrument.value).currency.name
 
-    def map_trade_action(self, field, direction):
+    def _map_object_value(self, obj, field, direction, finder, obj_attr = 'name'):
+        field_name = field.name
         if direction == field.TO:
-            self._trade.action = ChoiceList.find(self.s, 'Action', field.value)
+            if field.value:
+                setattr(obj, field_name, finder(field.value) )
         else:
-            return self._trade.action.value
+            entity = getattr(obj, field_name)
+            if entity:
+                return getattr(entity, obj_attr)
 
-    def map_currency(self, field, direction):
-        if direction == field.TO:
-            self._trade.currency = Instrument.find(self.s, field.value)
-        else:
-            return self._trade.currency.name
-            
+    def map_trade_action(self, field, direction):
+        def finder(field_value):
+            return ChoiceList.find(self.s, 'Action', field_value)
+        return self._map_object_value(self._trade, field, direction, finder, 'value')
+
     def map_instrument(self, field, direction):
-        if direction == field.TO:
-            self._trade.instrument = Instrument.find(self.s, field.value)
-        else:
-            return self._trade.instrument.name
+        def finder(field_value):
+            return Instrument.find(self.s, field_value)
+        return self._map_object_value(self._trade, field, direction, finder)
+            
+    def _map_port_value(self, field, direction, entity_type):
+        def finder(field_value):
+            return Entity.find(self.s, entity_type, field_value)
+        return self._map_object_value(self._port, field, direction, finder)
 
     def map_fund(self, field, direction):
-        if direction == field.TO:
-            self._port.fund = Entity.find(self.s, 'Fund', field.value)
-        else:
-            return self._trade.portfolio.fund.name
+        return self._map_port_value(field, direction, 'Fund')
+
+    def map_trader(self, field, direction):
+        return self._map_port_value(field, direction, 'Trader')
+
+    def map_analyst(self, field, direction):
+        return self._map_port_value(field, direction, 'Analyst')
+
+    def map_broker(self, field, direction):
+        return self._map_port_value(field, direction, 'Broker')
+
+    def map_clearer(self, field, direction):
+        return self._map_port_value(field, direction, 'Clearer')
 
     def save(self):
-        self._trade.portfolio = self._port
+        found = Portfolio.find_by_hash(self.s, self._port.get_hash_value())
+        self._trade.portfolio = found if found else self._port
+
         self.s.add(self._trade)
         return self._commit()
             
