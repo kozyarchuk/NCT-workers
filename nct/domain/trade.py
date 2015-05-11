@@ -7,14 +7,14 @@ class Trade(Base):
     __tablename__ = 'trade'
      
     id            = Column(Integer, primary_key=True)
-    instrument_id = Column( Integer, ForeignKey('instrument.id'))
-    action_id     = Column( Integer, ForeignKey('choice_list.id')) 
-    quantity      = Column( Numeric(27,8))
-    price         = Column( Numeric(31,12))
-    currency_id   = Column( Integer, ForeignKey('instrument.id'))
-    trade_date    = Column( Date )
-    settle_date   = Column( Date )
-    portfolio_id  = Column( Integer, ForeignKey('portfolio.id'))
+    instrument_id = Column( Integer, ForeignKey('instrument.id'), nullable = False)
+    action_id     = Column( Integer, ForeignKey('choice_list.id'), nullable = False) 
+    quantity      = Column( Numeric(27,8), nullable = False)
+    price         = Column( Numeric(31,12), nullable = False)
+    currency_id   = Column( Integer, ForeignKey('instrument.id'), nullable = False)
+    trade_date    = Column( Date , nullable = False)
+    settle_date   = Column( Date , nullable = False)
+    portfolio_id  = Column( Integer, ForeignKey('portfolio.id'), nullable = False)
 
     instrument  = relationship("Instrument",foreign_keys="[Trade.instrument_id]")
     action      = relationship("ChoiceList",foreign_keys="[Trade.action_id]")

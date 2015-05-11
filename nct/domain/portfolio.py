@@ -17,7 +17,7 @@ class Portfolio(Base):
     fund_id     = Column( Integer, ForeignKey('entity.id'))
     strategy    = Column( String(255))
     sector      = Column( String(255))
-    hash_value  = Column( String(255))
+    hash_value  = Column( String(255), nullable = False, unique = True)
 
     trader  = relationship("Entity",foreign_keys="[Portfolio.trader_id]")
     broker  = relationship("Entity",foreign_keys="[Portfolio.broker_id]")
