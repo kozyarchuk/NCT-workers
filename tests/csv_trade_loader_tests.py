@@ -46,8 +46,8 @@ class CSVTradeLoaderTest(unittest.TestCase):
         csv_file = os.path.join( tempfile.gettempdir(),'some_csv.csv')
         loader.write_csv(csv_file, headers, data)
         with open(csv_file,'r') as f:
-            expect = 'F1,F2\n\nV1,\n\nV1,V2\n\n'
-            self.assertEquals(expect.strip(), f.read().strip())
+            expect = 'F1,F2\n\nV1,\n\nV1,V2\n'
+            self.assertEquals(expect.replace("\n",""), f.read().replace("\n",""))
             
     def test_integration(self):
         Deployer.deploy()
