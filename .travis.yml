@@ -2,6 +2,11 @@ language: python
 python:
 - '2.7'
 - '3.4'
+env:
+  global:
+    - MYSQL_HOST=ignore
+    - MYSQL_DBO=ignore
+    - MYSQL_PWD=ignore
 install:
 - pip install -r requirements.txt
 script: nosetests
