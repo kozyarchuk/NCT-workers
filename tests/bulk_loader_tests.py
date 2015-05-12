@@ -60,6 +60,27 @@ class CSVTradeLoaderTest(unittest.TestCase):
         self.assertEquals( date(2015,1,3), rf.get_value('settle_date' ))
         self.assertEquals( "Fund1", rf.get_value('fund' ))        
 
+    def test_populate_rf_logs_errors_setting_fields(self):
+        Deployer.deploy()
+        rec = {"Quantity": 'ABC', "Price":123, "Action": "Buy", "Trade Date":"2015-13-01", 
+                "Instrument":"BAC.N", "Fund":"Invalid", "TradeType":"Vanilla"}
+        rp = RecordProcessor(rec)
+        rp.create_rf()
+        rp.populate_rf()
+        rf = rp._rf
+        self.assertEquals( None, rf.get_value('quantity' ))
+        self.assertEquals( 123, rf.get_value('price' ))
+        self.assertEquals( "Buy", rf.get_value('action' ))
+        self.assertEquals( "BAC.N", rf.get_value('instrument' ))
+        self.assertEquals( "USD", rf.get_value('currency'))
+        self.assertEquals( None, rf.get_value('trade_date' ))
+        self.assertEquals( None, rf.get_value('settle_date' ))
+        self.assertEquals( "Invalid", rf.get_value('fund' ))        
+        expect = "'Quantity': 'Invalid value >ABC< needs to be Numeric', 'Trade Date': 'Invalid value >2015-13-01< needs to be YYYY-MM-DD format'"
+        self.assertEquals(expect,  rp.errors )
+        
+        
+
     def test_validate_record_when_all_is_good(self):
         Deployer.deploy()
         rec = {"Quantity": 100, "Price":123, "Action": "Buy", "Trade Date":"2015-01-01", 
@@ -89,8 +110,8 @@ class CSVTradeLoaderTest(unittest.TestCase):
                 "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla"}
         rec3 = {"Quantity": 200, "Price":23, "Action": "Buy", "Trade Date":"", 
                 "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla"}
-        rec4 = {"Quantity": 200, "Price":23, "Action": "Buy", "Trade Date":"2015-13-01", 
-                "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla"}
+        rec4 = {"Quantity": 200, "Price":23, "Action": "Buy", "Trade Date":"2015-11-01", 
+                "Instrument":"BAC.N", "Fund":"Invalid", "TradeType":"Vanilla"}
 
         csv_items = [rec1, rec2, rec3, rec4]
         result = BulkTradeLoader(csv_items).load()

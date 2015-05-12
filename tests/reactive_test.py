@@ -4,7 +4,7 @@ from nct.utils.reactive.field_factory import FieldFactory
 from decimal import Decimal
 import datetime
 from nct.utils.reactive.bound_field import BoundField, InvalidModelError,\
-    InvalidFieldDefinitionlError
+    InvalidFieldDefinitionlError, DataTypeConversionError
 from datetime import date
 
 class FieldTest(unittest.TestCase):
@@ -110,6 +110,14 @@ class BoundFieldTest(unittest.TestCase):
         self.assertEquals(Decimal("100.1"), bf.value)
         self.assertEquals(True, bf.has_value)
         self.assertEquals(True, bf.has_user_entered_value)
+
+    def test_set_value_produces_readable_errors_when_conversion_failed_decimal(self):
+        bf = BoundField(Field(name="f1",  datatype=Decimal ) , StubModel())
+        self.assertRaisesRegex(DataTypeConversionError, "Invalid value >abv< needs to be Numeric", bf.set_value, "abv")
+
+    def test_set_value_produces_readable_errors_when_conversion_failed_date(self):
+        bf = BoundField(Field(name="f1",  datatype=datetime.date) , StubModel())
+        self.assertRaisesRegex(DataTypeConversionError, "Invalid value >2012-13-12< needs to be YYYY-MM-DD format", bf.set_value, "2012-13-12")
         
     def test_set_value_does_not_set_user_entered_flag(self):
         f = self.create_field()

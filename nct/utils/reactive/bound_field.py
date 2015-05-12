@@ -2,8 +2,16 @@ from datetime import date, datetime
 import inspect
 from nct.utils.reactive.common import InvalidModelError,\
     InvalidFieldDefinitionlError
+from decimal import Decimal
 
 DATATYPE_CONVERTERS = {(str,date):lambda value: datetime.strptime(value, "%Y-%m-%d").date()}
+
+def error_help(datatype):
+    error_help = {date:'YYYY-MM-DD format',
+                  Decimal: "Numeric"}
+    return error_help.get( datatype, datatype.__class__.__name__)
+
+class DataTypeConversionError(Exception): pass
 
 class BoundField:
     TO = 'TO'
@@ -40,7 +48,10 @@ class BoundField:
         else:  
             if not isinstance(value, self.definition.datatype):
                 converter = DATATYPE_CONVERTERS.get((type(value),self.definition.datatype), self.definition.datatype )
-                self.value = converter(value)
+                try:
+                    self.value = converter(value)
+                except:
+                    raise DataTypeConversionError("Invalid value >{}< needs to be {}".format(value, error_help(self.definition.datatype)))
             else:
                 self.value =  value
                 

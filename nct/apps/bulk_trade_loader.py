@@ -55,6 +55,10 @@ class RecordProcessor:
         self._rf = None
         self.errors = ''
 
+    def _format_errors(self, errors):
+        return ", ".join(["{!r}: {!r}".format(self.REV_MAP[field], value) for 
+                (field, value) in sorted(errors.items())])
+
     def process(self):
         self.create_rf()
         self.populate_rf()
@@ -70,17 +74,21 @@ class RecordProcessor:
     def populate_rf(self):
         if self.errors:
             return
+        errors = {}
         for external_name, internal_name in self.FIELD_MAP:
             value = self.record.get(external_name)
             if value:
-                self._rf.set_value(internal_name, value)
-
+                try:
+                    self._rf.set_value(internal_name, value)
+                except Exception as e:
+                    errors[internal_name] =  str(e)
+        self.errors  = self._format_errors(errors)
+            
     def validate_rf(self):
         if self.errors:
             return
         errors = self._rf.validate()
-        self.errors  = ", ".join(["{!r}: {!r}".format(self.REV_MAP[field], value) 
-                                  for field, value in sorted(errors.items())])
+        self.errors  = self._format_errors(errors)
 
     def save(self):
         if self.errors:
