@@ -20,10 +20,14 @@ class CSVTradeLoader(object):
     @property
     def error_file(self):
         return self.file_root + "_errors.csv"
+
+    @property
+    def error_filepath(self):
+        return os.path.join( self.output, self.error_file)
     
     def load_trade_file(self):
         trades = []
-        fields = None
+        fields = []
         with open(os.path.join(self.source, self.trade_file), 'r') as f:
             reader = csv.reader(f)
             for row in reader:
@@ -34,19 +38,18 @@ class CSVTradeLoader(object):
         return fields, trades
 
     def write_csv(self,file_name, header, records):
-        full_path = os.path.join(self.output,file_name)
-        with open(full_path, 'w') as f:
+        with open(file_name, 'w') as f:
             writer = csv.DictWriter(f, header)
             writer.writeheader()
             writer.writerows(records)  
-        print ("Wrote {} records to {}".format(len(records), full_path ))  
+        print ("Wrote {} records to {}".format(len(records), file_name ))  
         
     def run(self):
         fields, trades = self.load_trade_file()
         if BulkTradeLoadStatus.STATUS_FIELD not in fields:
             fields.append(BulkTradeLoadStatus.STATUS_FIELD)
         status = BulkTradeLoader(trades).load()
-        self.write_csv(self.error_file, fields, status.rejected_trades)
+        self.write_csv(self.error_filepath, fields, status.rejected_trades)
         
     
     @classmethod

@@ -30,22 +30,11 @@ conn = boto.connect_s3()
 def process_trade_file():
     try:
         for record in S3Message.parse(request.json):
-            bucket = conn.get_bucket(record.bucket)
-            trade_file_key = bucket.get_key(record.file_name)
-            trade_file_url = trade_file_key.generate_url(0, query_auth=False, force_http=True)
-            logger.info("TF URL: %s" % trade_file_url )
-            fd, file_name = tempfile.mkstemp(".csv")
-            os.close(fd)
-            urlretrieve(trade_file_url, file_name)
-            logger.info("Uploading Trade File: %s" % file_name )
-            loader = CSVTradeLoader.create_from_path(file_name)
-            loader.run()
-            logger.info("File uploaded")
-            os.remove(file_name)
+            logger.info( "Processing of {} started".format(record.file_name))
+            result = record.process(conn) 
+            logger.info( "Processing complete with {}".format( result ))
     except Exception:
         logger.exception("Process Trade File Failed")
-        
-    application.logger.warning('The request is in')
     return "Request handled."
 
 if __name__ == '__main__':

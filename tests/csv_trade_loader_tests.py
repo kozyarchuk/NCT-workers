@@ -9,8 +9,12 @@ from nct.deploy.deploy import Deployer
 class CSVTradeLoaderTest(unittest.TestCase):
     
     def test_error_file(self):
-        loader = CSVTradeLoader("file_root")
-        self.assertEquals('file_root_errors.csv', loader.error_file)
+        loader = CSVTradeLoader("file_root", output= '/foo/bar')
+        self.assertEquals(r'file_root_errors.csv', loader.error_file)
+    
+    def test_error_filepath(self):
+        loader = CSVTradeLoader("file_root", output= '/foo/bar')
+        self.assertEquals(r'/foo/bar\file_root_errors.csv', loader.error_filepath)
 
     def test_trade_file(self):
         loader = CSVTradeLoader("file_root")
