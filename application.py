@@ -20,7 +20,8 @@ application = flask.Flask(__name__)
 @application.route('/',methods=['POST'])
 @application.route('/service-request',methods=['POST'])
 def hello_world():
-    logger.info("REQUEST>%s<" % request.__dict__)
+    logger.info("HEADERS>%s<" % request.headers)
+    logger.info("BODY>%s<" % request.json)
     application.logger.warning('The request is in')
     return "Request handled."
 
