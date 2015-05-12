@@ -18,7 +18,7 @@ class BoundField:
     FROM = 'FROM'
     __slots__ = ('definition', 'value', 
                  'has_value', 'has_user_entered_value', 
-                 'calculation_method', 'validation_method', 'domain_mapping_method' )
+                 'calculation_method', 'validation_method', 'domain_mapping_method', 'error' )
     
     def __init__(self, field_definition, model):
         self.definition = field_definition
@@ -28,6 +28,7 @@ class BoundField:
         self.calculation_method = self._bind_method('calculation_method', model, 1)
         self.validation_method = self._bind_method('validation_method', model, 2)
         self.domain_mapping_method = self._bind_domain_mapping_method(model)
+        self.error = None
 
     def _bind_method(self, method, model, arg_check):
         method_name = getattr(self.definition, method)
@@ -61,8 +62,11 @@ class BoundField:
     def recalc(self):
         if not self.has_user_entered_value:
             if self.calculation_method:
-                self.set_value(self.calculation_method(), user_entered=False)
-                return True
+                try:
+                    self.set_value(self.calculation_method(), user_entered=False)
+                    return True
+                except Exception as e:
+                    self.error = str(e)
         return False
    
     def validate(self):

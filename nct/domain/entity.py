@@ -1,7 +1,8 @@
-from nct.domain.base import Base
+from nct.domain.base import Base, NotFound
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from nct.domain.choicelist import ChoiceList
+from sqlalchemy.orm.exc import NoResultFound
 
 class Entity(Base):
     __tablename__ = 'entity'
@@ -14,6 +15,9 @@ class Entity(Base):
 
     @classmethod
     def find(cls, s, type_name, name):
-        type_ = ChoiceList.find(s, 'EntityType', type_name)
-        return s.query(cls).filter_by(name=name, type=type_).one()
+        try:
+            type_ = ChoiceList.find(s, 'EntityType', type_name)
+            return s.query(cls).filter_by(name=name, type=type_).one()
+        except NoResultFound:
+            raise NotFound(">{}< Not Found".format(name))
 

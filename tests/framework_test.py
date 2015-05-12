@@ -85,6 +85,35 @@ class FrameWorkTest(unittest.TestCase):
         rf.set_value('calendar', 'USD')
         self.assertTrue(rf._are_dependents_set( 'settle_date' ) )
 
+    def test_when_recalculation_method_error_is_recorded_but_not_raised(self):
+        class FailedStub(StubModel):
+            def calc_settle_date(self):
+                raise Exception("I failed")
+        m = FailedStub()
+        rf = ReactiveFramework(m)
+        rf.set_value('trade_date', date(2015,1,1))
+        rf.set_value('calendar', 'USD')
+        self.assertEquals(None, rf.get_value('settle_date' ) )
+        f =  rf.get_field('settle_date' )
+        self.assertEquals("I failed", f.error)
+        
+    def test_when_mapper_fails_multiple_errors_are_returned(self):
+        class FailedStub(StubModel):
+            FIELD_DEPENDS = { 
+                             'currency':['instrument'],
+                             'instrument':[]
+                            }
+            def map_instrument(self, field, direction):
+                raise Exception("I failed")
+        m = FailedStub()
+        rf = ReactiveFramework(m)
+        rf.set_value('instrument', "ABC")
+        rf.set_value('currency', "USD")
+        status = rf.validate()
+        expect = {'instrument': 'I failed', 'currency': 'I failed'}
+        self.assertEquals(expect, status)
+        
+
     def test_set_field_recalcs(self):
         m = StubModel()
         rf = ReactiveFramework(m)
@@ -112,6 +141,7 @@ class FrameWorkTest(unittest.TestCase):
         m = StubModel()
         rf = ReactiveFramework(m)
         rf.set_value('quantity', 100)
+        rf.validate()
         rf.save()
 
         trade = m.get_domain_object('Trade')

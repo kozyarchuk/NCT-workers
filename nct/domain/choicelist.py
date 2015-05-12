@@ -1,6 +1,7 @@
-from nct.domain.base import Base
+from nct.domain.base import Base, NotFound
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.schema import UniqueConstraint
+from sqlalchemy.orm.exc import NoResultFound
 
 class ChoiceList(Base):
     __tablename__ = 'choice_list'
@@ -12,4 +13,7 @@ class ChoiceList(Base):
                      )   
     @classmethod
     def find(cls,s, list_name, value):
-        return s.query(ChoiceList).filter_by(list_name = list_name, value = value).one()
+        try:
+            return s.query(ChoiceList).filter_by(list_name = list_name, value = value).one()
+        except NoResultFound:
+            raise NotFound(">{}< Not Found".format(value))

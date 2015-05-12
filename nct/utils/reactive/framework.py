@@ -46,6 +46,13 @@ class ReactiveFramework:
             errors = field.validate()
             if errors:
                 result[field.name] = errors
+        
+        for field in self.get_fields():
+            try:
+                field.map_to_domain()
+            except Exception as ex:
+                result[field.name] = str(ex)
+
         return result
     
     def get_fields(self):
@@ -56,8 +63,6 @@ class ReactiveFramework:
         return  getattr(self.model, field_name)
 
     def save(self):
-        for field in self.get_fields():
-            field.map_to_domain()
         return self.model.save()
         
     def load(self,trade_id):

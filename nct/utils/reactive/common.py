@@ -4,3 +4,4 @@ class InvalidModelError(Exception):
 
 class InvalidFieldDefinitionlError(Exception):
     pass
+

@@ -1,6 +1,7 @@
-from nct.domain.base import Base
+from nct.domain.base import Base, NotFound
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm.exc import NoResultFound
 
 class Instrument(Base):
     __tablename__ = 'instrument'
@@ -18,5 +19,8 @@ class Instrument(Base):
 
     @classmethod
     def find(cls, s, name):
-        return s.query(cls).filter_by(name=name).one()
+        try:
+            return s.query(cls).filter_by(name=name).one()
+        except NoResultFound:
+            raise NotFound(">{}< Not Found".format(name))
 

@@ -22,6 +22,7 @@ class VanillaModelTest(unittest.TestCase):
         rf.set_value('instrument', "GOOGL.O")
         rf.set_value('trade_date', date(2015, 5, 5))
         rf.set_value('fund', "Fund1")
+        self.assertEquals({},  rf.validate() )
         trade_id = rf.save()
         return trade_id
          
@@ -74,6 +75,7 @@ class VanillaModelTest(unittest.TestCase):
         rf.set_value( 'instrument', "GOOGL.O")
         rf.set_value( 'trade_date', date(2015,5,5))
         rf.set_value( 'fund', "Fund2")
+        self.assertEquals({}, rf.validate())
         rf.save()
  
         s = Session()
@@ -119,6 +121,7 @@ class VanillaModelTest(unittest.TestCase):
         rf.set_value('sector', "sec1")
         rf.set_value('strategy', "strat1")
 
+        self.assertEquals({},rf.validate() )
         trade_id = rf.save()
         rf.load(trade_id)
         self.assertEquals( "Fund1", rf.get_value('fund' ))
@@ -139,5 +142,18 @@ class VanillaModelTest(unittest.TestCase):
         self.assertEquals( 'Clearer1', ports[0].clearer.name )
         self.assertEquals( 'sec1', ports[0].sector )
         self.assertEquals( 'strat1', ports[0].strategy )
+
+        
+    def test_invalid_instrument(self):
+        Deployer.deploy()
+        rf = ReactiveFramework(VanillaModel())
+        rf.set_value('quantity', 100)
+        rf.set_value('price', 600)
+        rf.set_value('action', "Buy")
+        rf.set_value('instrument', "INVALID")
+        rf.set_value('trade_date', date(2015, 5, 5))
+        rf.set_value('fund', "Fund1")
+        expect = {'currency': 'Not set', 'instrument': '>INVALID< Not Found'}
+        self.assertEquals(expect,  rf.validate() )
 
         

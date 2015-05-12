@@ -1,4 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-import hashlib
 
+class NotFound(Exception): pass
+    
 Base = declarative_base()
