@@ -73,7 +73,7 @@ class S3ParserTest(unittest.TestCase):
         with open(StubS3Key.BUCKET_FILE, 'r') as f:
             action = f.read()
             
-        self.assertEquals(expect, action) 
+        self.assertEquals(expect.strip(), action.strip()) 
 
 
             

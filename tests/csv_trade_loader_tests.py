@@ -14,7 +14,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
     
     def test_error_filepath(self):
         loader = CSVTradeLoader("file_root", output= '/foo/bar')
-        self.assertEquals(r'/foo/bar\file_root_errors.csv', loader.error_filepath)
+        self.assertEquals(os.path.join('/foo/bar', 'file_root_errors.csv'), loader.error_filepath)
 
     def test_trade_file(self):
         loader = CSVTradeLoader("file_root")
@@ -34,13 +34,13 @@ class CSVTradeLoaderTest(unittest.TestCase):
         self.assertEquals(expect, trades[0])
 
     def test_write_csv(self):
-        loader = CSVTradeLoader("some_csv")
+        loader = CSVTradeLoader("some_csv", output= tempfile.gettempdir())
         headers = ['F1', 'F2']
         data = [{'F1':'V1'}, {'F1':'V1','F2':'V2'}]
         loader.write_csv('some_csv.csv', headers, data)
         with open(os.path.join( tempfile.gettempdir(),'some_csv.csv'),'r') as f:
             expect = 'F1,F2\n\nV1,\n\nV1,V2\n\n'
-            self.assertEquals(expect, f.read())
+            self.assertEquals(expect.strip(), f.read().strip())
             
     def test_integration(self):
         Deployer.deploy()
@@ -48,7 +48,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
         loader.run()
         with open(os.path.join( tempfile.gettempdir(),loader.error_file),'r') as f:
             expect = 'Quantity,Price,Action,Trade Date,Instrument,Fund,TradeType,Status\n\n'
-            self.assertEquals(expect, f.read())
+            self.assertEquals(expect.strip(), f.read().strip())
 
         s = Session()
         trades = s.query(Trade).all()
