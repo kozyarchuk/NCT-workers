@@ -1,5 +1,5 @@
 import unittest
-from nct.apps.csv_trade_loader import CSVTradeLoader
+from nct.apps.csv_trade_loader import CSVTradeLoader, CSVLoaderError
 import os
 import tempfile
 from nct.utils.alch import Session
@@ -50,7 +50,16 @@ class CSVTradeLoaderTest(unittest.TestCase):
         trades = s.query(Trade).all()
         self.assertEquals( 2, len(trades) )
 
+    def test_create_from_path(self):
+        file_name = '/foo/bar/test.csv'
+        loader = CSVTradeLoader.create_from_path(file_name)
+        self.assertEquals('test', loader.file_root)
+        self.assertEquals('/foo/bar', loader.source)
+        self.assertEquals('/foo/bar', loader.output)
 
+    def test_create_from_path_only_supports_csv(self):
+        self.assertRaisesRegexp(CSVLoaderError,'Invalid extension', CSVTradeLoader.create_from_path, '/foo/bar/test.bad' )
+        
 
             
 

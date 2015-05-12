@@ -3,6 +3,9 @@ from nct.apps.bulk_trade_loader import BulkTradeLoader, BulkTradeLoadStatus
 import os
 import tempfile
 
+class CSVLoaderError(Exception):
+    pass
+
 class CSVTradeLoader(object):
     
     def __init__(self, file_root, source = None, output = None):
@@ -45,6 +48,12 @@ class CSVTradeLoader(object):
         status = BulkTradeLoader(trades).load()
         self.write_csv(self.error_file, fields, status.rejected_trades)
         
-if __name__ == "__main__":
-    loader = CSVTradeLoader('fxtrades')
-    loader.run()
+    
+    @classmethod
+    def create_from_path(cls, file_path):
+        folder, file_name = os.path.split(file_path)
+        file_root, ext = os.path.splitext(file_name) 
+        if ext != '.csv':
+            raise CSVLoaderError("Invalid extension %s only .csv is allowed" % ext)
+        return cls(file_root, folder, folder )
+    
