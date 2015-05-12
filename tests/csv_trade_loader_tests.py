@@ -5,6 +5,12 @@ import tempfile
 from nct.utils.alch import Session
 from nct.domain.trade import Trade
 from nct.deploy.deploy import Deployer
+import sys
+
+
+if sys.version_info[:2] == (2, 7):
+    unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
+
 
 class CSVTradeLoaderTest(unittest.TestCase):
     
@@ -34,11 +40,12 @@ class CSVTradeLoaderTest(unittest.TestCase):
         self.assertEquals(expect, trades[0])
 
     def test_write_csv(self):
-        loader = CSVTradeLoader("some_csv", output= tempfile.gettempdir())
+        loader = CSVTradeLoader("some_csv")
         headers = ['F1', 'F2']
         data = [{'F1':'V1'}, {'F1':'V1','F2':'V2'}]
-        loader.write_csv('some_csv.csv', headers, data)
-        with open(os.path.join( tempfile.gettempdir(),'some_csv.csv'),'r') as f:
+        csv_file = os.path.join( tempfile.gettempdir(),'some_csv.csv')
+        loader.write_csv(csv_file, headers, data)
+        with open(csv_file,'r') as f:
             expect = 'F1,F2\n\nV1,\n\nV1,V2\n\n'
             self.assertEquals(expect.strip(), f.read().strip())
             
@@ -62,7 +69,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
         self.assertEquals('/foo/bar', loader.output)
 
     def test_create_from_path_only_supports_csv(self):
-        self.assertRaisesRegexp(CSVLoaderError,'Invalid extension', CSVTradeLoader.create_from_path, '/foo/bar/test.bad' )
+        self.assertRaisesRegex(CSVLoaderError,'Invalid extension', CSVTradeLoader.create_from_path, '/foo/bar/test.bad' )
         
 
             

@@ -6,8 +6,13 @@ import datetime
 from nct.utils.reactive.bound_field import BoundField, InvalidModelError,\
     InvalidFieldDefinitionlError, DataTypeConversionError
 from datetime import date
+import sys
+
+if sys.version_info[:2] == (2, 7):
+    unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
 class FieldTest(unittest.TestCase):
+    
 
     def test_field_construction(self):
         f = Field(name = "f1", 
