@@ -8,3 +8,4 @@ script: nosetests
 notifications:
   email:
     - maksim_kozyarchuk@yahoo.com
+    
