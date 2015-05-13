@@ -31,7 +31,6 @@ class ReactiveModel:
     def  _commit(self):
         try:
             self.s.commit()
-            return self._trade.id
         except:
             self.s.rollback()
             raise

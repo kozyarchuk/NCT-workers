@@ -5,7 +5,7 @@ from nct.utils.alch import Session
 from nct.domain.trade import Trade
 from datetime import date
 from nct.domain.portfolio import Portfolio
-from tests.test_util import TestSchema
+from tests.test_util import TestSchema, get_next_id
 from nct.utils.reactive.bound_field import BoundField
 from nct.utils.reactive.field import Field
 
@@ -40,6 +40,7 @@ class VanillaModelTest(unittest.TestCase):
         rf.set_value('clearer', "Clearer1")
         rf.set_value('sector', "sec1")
         rf.set_value('strategy', "strat1")
+        rf.set_value('trade_id', "ZZ{}".format(get_next_id()))
         self.assertEquals({},  rf.validate() )
         trade_id = rf.save()
         return trade_id
@@ -104,7 +105,7 @@ class VanillaModelTest(unittest.TestCase):
         trade_id = self.book_a_trade()
         trades = s.query(Trade).all()
         self.assertEquals( 1, len(trades) )
-        self.assertEquals( trade_id, trades[0].id)
+        self.assertEquals( trade_id, trades[0].trade_id)
         self.assertEquals( 100, trades[0].quantity )
         self.assertEquals( 600, trades[0].price )
         self.assertEquals( "Buy", trades[0].action.value )
@@ -179,5 +180,13 @@ class VanillaModelTest(unittest.TestCase):
         ports = s.query(Portfolio).all()
         self.assertEquals( 1, len(ports) )
 
+    def test_load_missing_trade(self):
+        rf = ReactiveFramework(VanillaModel())
+        self.assertEquals(None, rf.load('ABC123'))
 
-        
+    def test_load_existing_trade(self):
+        trade_id = self.book_a_trade()
+        rf = ReactiveFramework(VanillaModel())
+        self.assertEquals(trade_id, rf.load(trade_id))
+
+

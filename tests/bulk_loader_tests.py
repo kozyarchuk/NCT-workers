@@ -1,7 +1,7 @@
 import unittest
 from nct.apps.bulk_trade_loader import BulkTradeLoader, RecordProcessor
 from nct.presentation.vanilla import VanillaModel
-from tests.test_util import TestSchema
+from tests.test_util import TestSchema, get_next_id
 
 class WrappedRF:
     save_called = False
@@ -29,7 +29,11 @@ class WrappedRF:
         rp._rf = cls(rp._rf)
         return rp
 
-
+def get_record(data):
+    record = {"Quantity": 100, "Price":123, "Action": "Buy", "Trade Date":"2015-01-01", 
+                "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla", "Trade ID":"TT{}".format(get_next_id())}
+    record.update(data)
+    return record
 
 class CSVTradeLoaderTest(unittest.TestCase):
     
@@ -67,8 +71,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
         self.assertEquals(VanillaModel, rp._rf.model.__class__)
         
     def test_populate_rf_maps_fields_and_records_errors(self):
-        rec = {"Quantity": 'ABC', "Price":123, "Action": "Buy", "Trade Date":"2015-13-01", 
-                "Instrument":"BAC.N", "Fund":"Invalid", "TradeType":"Vanilla"}
+        rec = get_record({"Quantity": 'ABC', "Price":123,"Fund":"Invalid",  "Trade Date":"2015-13-01"})
         rp = RecordProcessor(rec)
         rp.create_rf()
         rp.populate_rf()
@@ -86,14 +89,15 @@ class CSVTradeLoaderTest(unittest.TestCase):
         
 
     def test_validate_record_when_all_is_good(self):
-        rec = {"Quantity": 100, "Price":123, "Action": "Buy", "Trade Date":"2015-01-01", 
-                "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla"}
+        rec = get_record({"Quantity": 100, "Price":123})
         rp = RecordProcessor(rec)
         rp.process()
         self.assertEquals('', rp.errors)
 
     def test_validate_record_when_missing_fields(self):
-        rec = {"Quantity": 100, "Price":123, "Action": "Buy", "Trade Date":"2015-01-01", "TradeType":"Vanilla"}
+        rec = get_record({"Quantity": 100, "Price":123})
+        del rec['Instrument']
+        del rec['Fund']
         rp = RecordProcessor(rec)
         rp.process()
         self.assertEquals( "'Currency': 'Not set', 'Fund': 'Not set'",  rp.errors)
@@ -144,15 +148,10 @@ class CSVTradeLoaderTest(unittest.TestCase):
         self.assertTrue(rp._rf.set_value_called)
         
     def test_load_trades_basic_integration(self):
-        rec1 = {"Quantity": 100, "Price":123, "Action": "Buy", "Trade Date":"2015-01-01", 
-                "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla"}
-        
-        rec2 = {"Quantity": 200, "Price":23, "Action": "Buy", "Trade Date":"2015-01-01", 
-                "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla"}
-        rec3 = {"Quantity": 200, "Price":23, "Action": "Buy", "Trade Date":"", 
-                "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla"}
-        rec4 = {"Quantity": 200, "Price":23, "Action": "Buy", "Trade Date":"2015-11-01", 
-                "Instrument":"BAC.N", "Fund":"Invalid", "TradeType":"Vanilla"}
+        rec1 = get_record({"Quantity": 100, "Price":22})
+        rec2 = get_record({"Quantity": 200, "Price":23})
+        rec3 = get_record({"Quantity": 200, "Price":23, "Trade Date":""})
+        rec4 = get_record({"Quantity": 200, "Price":23, "Fund":"Invalid"})
 
         csv_items = [rec1, rec2, rec3, rec4]
         result = BulkTradeLoader(csv_items).load()

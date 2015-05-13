@@ -1,4 +1,5 @@
 name,datatype,calculation_method,validation_method,domain_mapping
+trade_id,str,,must_be_provided,Trade.trade_id
 action,str,,must_be_provided,map_trade_action
 quantity,Decimal,,must_be_provided,Trade.quantity
 price,Decimal,,must_be_provided,Trade.price

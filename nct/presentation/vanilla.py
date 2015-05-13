@@ -5,10 +5,12 @@ import datetime
 from nct.domain.entity import Entity
 from nct.domain.choicelist import ChoiceList
 from nct.domain.instrument import Instrument
+from nct.domain.base import NotFound
 
 class VanillaModel(ReactiveModel):
     
-    FIELD_DEPENDS = { 'action':[],
+    FIELD_DEPENDS = {'trade_id':[], 
+                     'action':[],
                       'quantity':[],
                       'price': [],
                       'instrument':[],
@@ -86,16 +88,21 @@ class VanillaModel(ReactiveModel):
         self._trade.portfolio = found if found else self._port
 
         self.s.add(self._trade)
-        return self._commit()
-            
+        self._commit()
+        return self._trade.trade_id
+    
     def load(self, trade_id):
         self._domain_objects = {}
-        self._domain_objects[self.TRADE] = self.s.query(Trade).get( trade_id )
-        self._domain_objects[self.PORTFOLIO] = self._trade.portfolio
-    
+        try:
+            self._domain_objects[self.TRADE] = Trade.find(self.s, trade_id )
+            self._domain_objects[self.PORTFOLIO] = self._trade.portfolio
+        except NotFound:
+            self._domain_objects = self._init_domain_objects()
+        return self._trade.trade_id
+
     def delete(self):
         self.s.delete(self._trade)
-        return self._commit()
+        self._commit()
 
     def _init_domain_objects(self):
         return {self.TRADE: Trade(),

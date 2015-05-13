@@ -66,7 +66,7 @@ class ReactiveFramework:
         return self.model.save()
         
     def load(self,trade_id):
-        self.model.load(trade_id)
+        trade_id = self.model.load(trade_id)
         
         for field in self.get_fields():
             field.map_from_domain()
@@ -78,6 +78,7 @@ class ReactiveFramework:
                 
         for field in self.get_fields():
             field.has_user_entered_value = False
-                
+        return trade_id
+    
     def delete(self):
         self.model.delete()

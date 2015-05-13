@@ -32,7 +32,8 @@ class RecordProcessor:
     # FieldMap is represented as ordered list of tuples
     # to ensure repeatability of order in which values are set
     # on rf.
-    FIELD_MAP = [ ("Action",'action'),  
+    FIELD_MAP = [  ("Trade ID",'trade_id'),  
+                 ("Action",'action'),  
                  ('Quantity','quantity'),
                  ('Price','price'),
                  ('Instrument','instrument'),
@@ -56,7 +57,7 @@ class RecordProcessor:
         self.errors = ''
 
     def _format_errors(self, errors):
-        return ", ".join(["{!r}: {!r}".format(self.REV_MAP[field], value) for 
+        return ", ".join(["{!r}: {!r}".format(self.REV_MAP.get(field,field), value) for 
                 (field, value) in sorted(errors.items())])
 
     def process(self):

@@ -11,3 +11,11 @@ class TestSchema:
             Session.configure( bind=engine)
             Deployer.deploy()
             cls.created = True
+            
+
+last_id = 1
+def get_next_id():
+    global last_id
+    last_id +=1
+    return last_id
+            
