@@ -1,4 +1,4 @@
-Quantity,Price,Action,Trade Date,Instrument,Fund,TradeType,Trade ID
-200,22,Buy,2015-03-03,BAC.N,Fund1,Vanilla,123
--100,23,Sell,2015-03-04,BAC.N,Fund1,Vanilla,232
-333,112,Buy,2015-03-03,BAC.N,Fund1,,
+Quantity,Price,Action,Trade Date,Instrument,Fund,TradeType,Trade ID,Msg Type
+200,22,Buy,2015-03-03,BAC.N,Fund1,Vanilla,FF123,New
+-100,23,Sell,2015-03-04,BAC.N,Fund1,Vanilla,FF232,New
+333,112,Buy,2015-03-03,BAC.N,Fund1,,FF235,New

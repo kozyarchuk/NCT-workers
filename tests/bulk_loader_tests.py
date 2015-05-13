@@ -24,14 +24,18 @@ class WrappedRF:
 
     @classmethod
     def get_processor(cls):
-        rp = RecordProcessor({'Quantity':100, "TradeType":"Vanilla"})
+        rp = RecordProcessor(get_record({}))
         rp.create_rf()
         rp._rf = cls(rp._rf)
         return rp
 
+def get_min_record():
+    return {"TradeType":"Vanilla","Msg Type":"New", "Trade ID":"TT{}".format(get_next_id())}
+                                                                             
 def get_record(data):
-    record = {"Quantity": 100, "Price":123, "Action": "Buy", "Trade Date":"2015-01-01", 
-                "Instrument":"BAC.N", "Fund":"Fund1", "TradeType":"Vanilla", "Trade ID":"TT{}".format(get_next_id())}
+    record = get_min_record()
+    record.update({"Quantity": 100, "Price":123, "Action": "Buy", "Trade Date":"2015-01-01", 
+                "Instrument":"BAC.N", "Fund":"Fund1"})
     record.update(data)
     return record
 
@@ -52,7 +56,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
 
     def test_load_fails_if_not_able_to_determine_presentation_model(self):
         
-        input_rec = dict(quantity=100, price = 123)
+        input_rec = get_record({"TradeType":''})
         csv_items = [input_rec]
         result = BulkTradeLoader(csv_items).load()
         self.assertEquals(1, result.total)
@@ -61,11 +65,11 @@ class CSVTradeLoaderTest(unittest.TestCase):
         self.assertEquals(0, result.failed)
         self.assertEquals(1, len( result.rejected_trades))
         expect_rec = dict(input_rec)
-        expect_rec.update({"Status":"TradeType must be specified"})
+        expect_rec.update({"Status":"'TradeType': 'must be specified'"})
         self.assertEquals(result.rejected_trades[0], expect_rec)
 
     def test_create_rf_from_trade_type(self):
-        rec = { "Fund":"Fund1", "TradeType":"Vanilla"}
+        rec = get_record({})
         rp = RecordProcessor(rec)
         rp.create_rf()
         self.assertEquals(VanillaModel, rp._rf.model.__class__)
@@ -87,7 +91,6 @@ class CSVTradeLoaderTest(unittest.TestCase):
         expect = "'Quantity': 'Invalid value >ABC< needs to be Numeric', 'Trade Date': 'Invalid value >2015-13-01< needs to be YYYY-MM-DD format'"
         self.assertEquals(expect,  rp.errors )
         
-
     def test_validate_record_when_all_is_good(self):
         rec = get_record({"Quantity": 100, "Price":123})
         rp = RecordProcessor(rec)
@@ -105,15 +108,21 @@ class CSVTradeLoaderTest(unittest.TestCase):
     def test_create_rf_when_trade_type_is_missing(self):
         rp = RecordProcessor({})
         rp.create_rf()
-        self.assertEquals("TradeType must be specified", rp.errors)
+        self.assertEquals("'Msg Type': 'Valid Msg Types are New, Edit and Cancel', 'Trade ID': 'must be specified', 'TradeType': 'must be specified'", rp.errors)
         self.assertEquals(None, rp._rf )
 
     def test_create_rf_when_trade_type_is_not_set(self):
-        rp = RecordProcessor({'TradeType':""})
+        rp = RecordProcessor({'TradeType':"", 'Trade ID':"", 'Msg Type':"" })
         rp.create_rf()
-        self.assertEquals("TradeType must be specified", rp.errors)
+        self.assertEquals("'Msg Type': 'Valid Msg Types are New, Edit and Cancel', 'Trade ID': 'must be specified', 'TradeType': 'must be specified'", rp.errors)
         self.assertEquals(None, rp._rf)
-                                  
+
+    def test_create_rf_when_invalid_action(self):
+        rp = RecordProcessor({'TradeType':"Vanilla", 'Trade ID':"123", 'Msg Type':"Invalid" })
+        rp.create_rf()
+        self.assertEquals("'Msg Type': 'Valid Msg Types are New, Edit and Cancel'", rp.errors)
+        self.assertEquals(None, rp._rf)
+                                          
     def test_save_does_not_call_save_when_there_are_errors(self):
         rp = WrappedRF.get_processor()
         rp.errors = "Errors"
@@ -164,3 +173,33 @@ class CSVTradeLoaderTest(unittest.TestCase):
         expect_rec.update({"Status":"'Settle Date': 'Not set', 'Trade Date': 'Not set'"})
         self.assertEquals(result.rejected_trades[0], expect_rec)
 
+    def test_create_rf_will_fail_when_msg_type_is_new_and_id_aleady_exists(self):
+        rec1 = get_record({"Quantity": 100, "Price":22,"Trade ID":"ZZSDZCX"})
+        RecordProcessor(rec1).process()
+        rp = RecordProcessor({'TradeType':"Vanilla", 'Trade ID':"ZZSDZCX", 'Msg Type':"new" })
+        rp.create_rf()
+        self.assertEquals("'Msg Type': 'Trade ID already exists'", rp.errors)
+        self.assertEquals(None, rp._rf)
+        
+    def test_create_rf_will_fail_when_msg_type_is_edit_and_id_does_not_exists(self):
+        rp = RecordProcessor({'TradeType':"Vanilla", 'Trade ID':"-ZZSDZCX", 'Msg Type':"edit" })
+        rp.create_rf()
+        self.assertEquals("'Msg Type': 'Trade ID does not exist'", rp.errors)
+        self.assertEquals(None, rp._rf)
+
+    def test_create_rf_will_fail_when_msg_type_is_cancel_and_id_does_not_exists(self):
+        rp = RecordProcessor({'TradeType':"Vanilla", 'Trade ID':"-ZZSDZCX", 'Msg Type':"cancel" })
+        rp.create_rf()
+        self.assertEquals("'Msg Type': 'Trade ID does not exist'", rp.errors)
+        self.assertEquals(None, rp._rf)
+
+    def test_delete_will_delete_the_trade(self):
+        rec1 = get_record({"Quantity": 100, "Price":22,"Trade ID":"ZZSDZCY", 'Msg Type':"new" })
+        RecordProcessor(rec1).process()
+        rp = RecordProcessor({'TradeType':"Vanilla", 'Trade ID':"ZZSDZCY", 'Msg Type':"cancel" })
+        rp.process()
+        self.assertEquals("", rp.errors)
+
+        rp = RecordProcessor({'TradeType':"Vanilla", 'Trade ID':"ZZSDZCY", 'Msg Type':"edit" })
+        rp.process()
+        self.assertEquals("'Msg Type': 'Trade ID does not exist'", rp.errors)

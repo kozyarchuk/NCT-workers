@@ -29,6 +29,9 @@ class BulkTradeLoadStatus:
         self.total += 1
         
 class RecordProcessor:
+    MSG_TYPE = "Msg Type"
+    TRADE_ID = "Trade ID"
+    TRADE_TYPE = "TradeType"
     # FieldMap is represented as ordered list of tuples
     # to ensure repeatability of order in which values are set
     # on rf.
@@ -62,16 +65,48 @@ class RecordProcessor:
 
     def process(self):
         self.create_rf()
-        self.populate_rf()
-        self.validate_rf()
-        self.save()
+        if self.is_cancel():
+            self.delete()
+        else:
+            self.populate_rf()
+            self.validate_rf()
+            self.save()
+
+    @property
+    def msg_type(self):
+        return self.record.get(self.MSG_TYPE, "").lower()
+
+    is_new = lambda  self: self.msg_type == "new"
+    is_edit = lambda self: self.msg_type == "edit"
+    is_cancel = lambda  self: self.msg_type == "cancel"
 
     def create_rf(self):
-        if not self.record.get('TradeType'):
-            self.errors =  "TradeType must be specified"
-            return
+        required_fields = [self.TRADE_TYPE, self.TRADE_ID]
+        errors = {}
+        for field in required_fields:
+            if not self.record.get(field):
+                errors[field] = 'must be specified'
 
-        self._rf = ReactiveFramework(VanillaModel())
+        if not any([self.is_cancel(), self.is_edit(), self.is_new()]):
+            errors[self.MSG_TYPE] =  'Valid Msg Types are New, Edit and Cancel'
+        
+        rf = None        
+        if not errors:
+            rf = ReactiveFramework(VanillaModel())
+             
+            loaded = rf.load(self.record[self.TRADE_ID])
+            if loaded:
+                if self.is_new():
+                    errors[self.MSG_TYPE] = "{} already exists".format(self.TRADE_ID)
+            else:
+                if self.is_cancel() or self.is_edit():
+                    errors[self.MSG_TYPE] = "{} does not exist".format(self.TRADE_ID)
+            
+        self.errors = self._format_errors(errors)
+        if self.errors:
+            return
+        
+        self._rf = rf
 
     def populate_rf(self):
         if self.errors:
@@ -96,6 +131,11 @@ class RecordProcessor:
         if self.errors:
             return
         self._rf.save()
+
+    def delete(self):
+        if self.errors:
+            return
+        self._rf.delete()
 
         
 class BulkTradeLoader:

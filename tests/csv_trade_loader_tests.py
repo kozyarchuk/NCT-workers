@@ -28,13 +28,13 @@ class CSVTradeLoaderTest(unittest.TestCase):
     def test_load_trade_file(self):
         loader = CSVTradeLoader("trade_file", source = os.path.dirname(__file__))
         fields, trades = loader.load_trade_file()
-        expect = ['Quantity', 'Price', 'Action', 'Trade Date', 'Instrument', 'Fund', 'TradeType', "Trade ID"]
+        expect = ['Quantity', 'Price', 'Action', 'Trade Date', 'Instrument', 'Fund', 'TradeType', "Trade ID", 'Msg Type']
         self.assertEquals( expect, fields )
         self.assertEquals( 3, len(trades))
         expect = {'Action': 'Buy', 'Fund': 'Fund1',
                   'Instrument': 'BAC.N', 'Price': '22',
                   'Quantity': '200', 'Trade Date':  '2015-03-03',
-                  'TradeType': 'Vanilla','Trade ID': '123',}
+                  'TradeType': 'Vanilla','Trade ID': 'FF123','Msg Type': 'New'}
         
         self.assertEquals(expect, trades[0])
 
@@ -52,8 +52,8 @@ class CSVTradeLoaderTest(unittest.TestCase):
         loader = CSVTradeLoader("trade_file", source = os.path.dirname(__file__))
         loader.run()
         with open(os.path.join( tempfile.gettempdir(),loader.error_file),'r') as f:
-            expect = 'Quantity,Price,Action,Trade Date,Instrument,Fund,TradeType,Trade ID,Status\n\n'
-            expect += "333,112,Buy,2015-03-03,BAC.N,Fund1,,,TradeType must be specified"
+            expect = 'Quantity,Price,Action,Trade Date,Instrument,Fund,TradeType,Trade ID,Msg Type,Status\n\n'
+            expect += "333,112,Buy,2015-03-03,BAC.N,Fund1,,FF235,New,'TradeType': 'must be specified'"
             self.assertEquals(expect.replace("\n", "").replace("\r",""), f.read().replace("\n", "").replace("\r",""))
 
     def test_create_from_path(self):
