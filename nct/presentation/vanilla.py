@@ -44,6 +44,8 @@ class VanillaModel(ReactiveModel):
         if direction == field.TO:
             if field.value:
                 setattr(obj, field_name, finder(field.value) )
+            else:
+                setattr(obj, field_name, None )
         else:
             entity = getattr(obj, field_name)
             if entity:

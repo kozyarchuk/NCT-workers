@@ -1,18 +1,17 @@
+import os
+import sys
+import tempfile
 import unittest
 from nct.apps.csv_trade_loader import CSVTradeLoader, CSVLoaderError
-import os
-import tempfile
-from nct.utils.alch import Session
-from nct.domain.trade import Trade
-from nct.deploy.deploy import Deployer
-import sys
-
+from tests.test_util import TestSchema
 
 if sys.version_info[:2] == (2, 7):
     unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
-
 class CSVTradeLoaderTest(unittest.TestCase):
+    
+    def setUp(self):
+        TestSchema.create()
     
     def test_error_file(self):
         loader = CSVTradeLoader("file_root", output= '/foo/bar')
@@ -31,7 +30,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
         fields, trades = loader.load_trade_file()
         expect = ['Quantity', 'Price', 'Action', 'Trade Date', 'Instrument', 'Fund', 'TradeType']
         self.assertEquals( expect, fields )
-        self.assertEquals( 2, len(trades))
+        self.assertEquals( 3, len(trades))
         expect = {'Action': 'Buy', 'Fund': 'Fund1',
                   'Instrument': 'BAC.N', 'Price': '22',
                   'Quantity': '200', 'Trade Date':  '2015-03-03',
@@ -50,16 +49,12 @@ class CSVTradeLoaderTest(unittest.TestCase):
             self.assertEquals(expect.replace("\n","").replace("\r",""), f.read().replace("\n","").replace("\r",""))
             
     def test_integration(self):
-        Deployer.deploy()
         loader = CSVTradeLoader("trade_file", source = os.path.dirname(__file__))
         loader.run()
         with open(os.path.join( tempfile.gettempdir(),loader.error_file),'r') as f:
             expect = 'Quantity,Price,Action,Trade Date,Instrument,Fund,TradeType,Status\n\n'
-            self.assertEquals(expect.strip(), f.read().strip())
-
-        s = Session()
-        trades = s.query(Trade).all()
-        self.assertEquals( 2, len(trades) )
+            expect += "333,112,Buy,2015-03-03,BAC.N,Fund1,,TradeType must be specified"
+            self.assertEquals(expect.replace("\n", "").replace("\r",""), f.read().replace("\n", "").replace("\r",""))
 
     def test_create_from_path(self):
         file_name = '/foo/bar/test.csv'

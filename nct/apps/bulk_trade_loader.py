@@ -66,8 +66,9 @@ class RecordProcessor:
         self.save()
 
     def create_rf(self):
-        if 'TradeType' not in self.record:
+        if not self.record.get('TradeType'):
             self.errors =  "TradeType must be specified"
+            return
 
         self._rf = ReactiveFramework(VanillaModel())
 
@@ -100,7 +101,6 @@ class BulkTradeLoader:
 
     def __init__(self, records):
         self.records = records
-        
         
     def load(self):
         status =  BulkTradeLoadStatus()
