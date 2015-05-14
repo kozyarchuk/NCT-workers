@@ -5,11 +5,11 @@ from nct.utils.reactive.common import InvalidModelError,\
 from decimal import Decimal
 
 DATATYPE_CONVERTERS = {(str,date):lambda value: datetime.strptime(value, "%Y-%m-%d").date()}
-
-def error_help(datatype):
+def datatype_format(datatype):
     error_help = {date:'YYYY-MM-DD format',
-                  Decimal: "Numeric"}
-    return error_help.get( datatype, datatype.__class__.__name__)
+                  Decimal: "Numeric",
+                  str:'Alpha-Numeric'}
+    return error_help.get( datatype, datatype.__name__)
 
 class DataTypeConversionError(Exception): pass
 
@@ -52,7 +52,7 @@ class BoundField:
                 try:
                     self.value = converter(value)
                 except:
-                    raise DataTypeConversionError("Invalid value >{}< needs to be {}".format(value, error_help(self.definition.datatype)))
+                    raise DataTypeConversionError("Invalid value >{}< needs to be {}".format(value, datatype_format(self.definition.datatype)))
             else:
                 self.value =  value
                 

@@ -8,6 +8,10 @@ class ReactiveModel:
     PORTFOLIO = 'Portfolio'
     FIELD_DEPENDS = { }
 
+    @classmethod
+    def model_name(cls):
+        return str(cls.__name__).replace("Model","")
+    
     def __init__(self):
         self.s = Session()
         self._domain_objects = self._init_domain_objects()

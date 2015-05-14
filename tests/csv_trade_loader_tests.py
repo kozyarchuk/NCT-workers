@@ -53,7 +53,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
         loader.run()
         with open(os.path.join( tempfile.gettempdir(),loader.error_file),'r') as f:
             expect = 'Quantity,Price,Action,Trade Date,Instrument,Fund,TradeType,Trade ID,Msg Type,Status\n\n'
-            expect += "333,112,Buy,2015-03-03,BAC.N,Fund1,,FF235,New,'TradeType': 'must be specified'"
+            expect += "333,112,Buy,2015-03-03,BAC.N,Fund1,,FF235,New,'TradeType': 'Valid values for TradeType are [Vanilla]'"
             self.assertEquals(expect.replace("\n", "").replace("\r",""), f.read().replace("\n", "").replace("\r",""))
 
     def test_create_from_path(self):

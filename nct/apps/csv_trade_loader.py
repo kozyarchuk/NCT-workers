@@ -37,9 +37,10 @@ class CSVTradeLoader(object):
                     trades.append(dict((f,v) for f,v in zip(fields,row)))
         return fields, trades
 
-    def write_csv(self,file_name, header, records):
+    @classmethod
+    def write_csv(cls, file_name, header, records):
         with open(file_name, 'w') as f:
-            writer = csv.DictWriter(f, header)
+            writer = csv.DictWriter(f, header, lineterminator='\n')
             writer.writeheader()
             writer.writerows(records)  
         print ("Wrote {} records to {}".format(len(records), file_name ))  

@@ -65,7 +65,7 @@ class CSVTradeLoaderTest(unittest.TestCase):
         self.assertEquals(0, result.failed)
         self.assertEquals(1, len( result.rejected_trades))
         expect_rec = dict(input_rec)
-        expect_rec.update({"Status":"'TradeType': 'must be specified'"})
+        expect_rec.update({"Status":"'TradeType': 'Valid values for TradeType are [Vanilla]'"})
         self.assertEquals(result.rejected_trades[0], expect_rec)
 
     def test_create_rf_from_trade_type(self):
@@ -108,20 +108,28 @@ class CSVTradeLoaderTest(unittest.TestCase):
     def test_create_rf_when_trade_type_is_missing(self):
         rp = RecordProcessor({})
         rp.create_rf()
-        self.assertEquals("'Msg Type': 'Valid Msg Types are New, Edit and Cancel', 'Trade ID': 'must be specified', 'TradeType': 'must be specified'", rp.errors)
+        self.assertEquals("'Msg Type': 'Valid Msg Types are New,Edit,Cancel', 'Trade ID': 'must be specified', 'TradeType': 'Valid values for TradeType are [Vanilla]'", rp.errors)
         self.assertEquals(None, rp._rf )
 
     def test_create_rf_when_trade_type_is_not_set(self):
         rp = RecordProcessor({'TradeType':"", 'Trade ID':"", 'Msg Type':"" })
         rp.create_rf()
-        self.assertEquals("'Msg Type': 'Valid Msg Types are New, Edit and Cancel', 'Trade ID': 'must be specified', 'TradeType': 'must be specified'", rp.errors)
+        self.assertEquals("'Msg Type': 'Valid Msg Types are New,Edit,Cancel', 'Trade ID': 'must be specified', 'TradeType': 'Valid values for TradeType are [Vanilla]'", rp.errors)
         self.assertEquals(None, rp._rf)
 
     def test_create_rf_when_invalid_action(self):
         rp = RecordProcessor({'TradeType':"Vanilla", 'Trade ID':"123", 'Msg Type':"Invalid" })
         rp.create_rf()
-        self.assertEquals("'Msg Type': 'Valid Msg Types are New, Edit and Cancel'", rp.errors)
+        self.assertEquals("'Msg Type': 'Valid Msg Types are New,Edit,Cancel'", rp.errors)
         self.assertEquals(None, rp._rf)
+
+
+    def test_create_rf_when_invalid_trade_type(self):
+        rp = RecordProcessor({'TradeType':"Invalid", 'Trade ID':"123", 'Msg Type':"new" })
+        rp.create_rf()
+        self.assertEquals("'TradeType': 'Valid values for TradeType are [Vanilla]'", rp.errors)
+        self.assertEquals(None, rp._rf)
+
                                           
     def test_save_does_not_call_save_when_there_are_errors(self):
         rp = WrappedRF.get_processor()
@@ -203,3 +211,13 @@ class CSVTradeLoaderTest(unittest.TestCase):
         rp = RecordProcessor({'TradeType':"Vanilla", 'Trade ID':"ZZSDZCY", 'Msg Type':"edit" })
         rp.process()
         self.assertEquals("'Msg Type': 'Trade ID does not exist'", rp.errors)
+
+    def test_list_of_models(self):
+        self.assertEquals([VanillaModel], RecordProcessor.model_list())
+
+    def test_get_model_from_trade_type(self):
+        self.assertEquals(VanillaModel, RecordProcessor.get_model("Vanilla"))
+        self.assertEquals(VanillaModel, RecordProcessor.get_model("vaNiLla"))
+        self.assertEquals(None, RecordProcessor.get_model("Undefined"))
+    
+

@@ -32,6 +32,7 @@ class RecordProcessor:
     MSG_TYPE = "Msg Type"
     TRADE_ID = "Trade ID"
     TRADE_TYPE = "TradeType"
+    MSG_TYPE_VALUES = ['New', 'Edit','Cancel']
     # FieldMap is represented as ordered list of tuples
     # to ensure repeatability of order in which values are set
     # on rf.
@@ -72,6 +73,18 @@ class RecordProcessor:
             self.validate_rf()
             self.save()
 
+    @classmethod
+    def model_list(cls):
+        return [VanillaModel]
+    
+    @classmethod
+    def get_model(cls, trade_type):
+        for model in cls.model_list():
+            model_name = model.model_name().lower()
+            if model_name == trade_type.lower():
+                return model
+        
+        
     @property
     def msg_type(self):
         return self.record.get(self.MSG_TYPE, "").lower()
@@ -81,18 +94,20 @@ class RecordProcessor:
     is_cancel = lambda  self: self.msg_type == "cancel"
 
     def create_rf(self):
-        required_fields = [self.TRADE_TYPE, self.TRADE_ID]
         errors = {}
-        for field in required_fields:
-            if not self.record.get(field):
-                errors[field] = 'must be specified'
+        if not self.record.get(self.TRADE_ID):
+            errors[self.TRADE_ID] = 'must be specified'
 
+        model_klass = RecordProcessor.get_model(self.record.get(self.TRADE_TYPE,""))
+        if not model_klass:
+            errors[self.TRADE_TYPE] = 'Valid values for {} are [{}]'.format(self.TRADE_TYPE, ",".join([m.model_name() for m in self.model_list()]))
+        
         if not any([self.is_cancel(), self.is_edit(), self.is_new()]):
-            errors[self.MSG_TYPE] =  'Valid Msg Types are New, Edit and Cancel'
+            errors[self.MSG_TYPE] =  'Valid Msg Types are {}'.format(",".join(self.MSG_TYPE_VALUES))
         
         rf = None        
         if not errors:
-            rf = ReactiveFramework(VanillaModel())
+            rf = ReactiveFramework(model_klass())
              
             loaded = rf.load(self.record[self.TRADE_ID])
             if loaded:
