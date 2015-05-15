@@ -86,10 +86,10 @@ class VanillaModel(ReactiveModel):
     def save(self):
         found = Portfolio.find_by_hash(self.s, self._port.get_hash_value())
         self._trade.portfolio = found if found else self._port
-
+        trade_id = self._trade.trade_id
         self.s.add(self._trade)
         self._commit()
-        return self._trade.trade_id
+        return trade_id
     
     def load(self, trade_id):
         self._domain_objects = {}

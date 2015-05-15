@@ -10,12 +10,13 @@ mysql_params = dict(host=os.environ['MYSQL_HOST'],
 
 engine =  create_engine( "mysql://{user}:{passwd}@{host}/{db}".format(**mysql_params))
 Session = sessionmaker(bind=engine)
+LSession = sessionmaker(bind=create_engine('sqlite:///:memory:'))
 
 
 @contextmanager
-def session_scope():
+def session_scope(session_maker = Session):
     """Provide a transactional scope around a series of operations."""
-    session = Session()
+    session = session_maker()
     try:
         yield session
         session.commit()

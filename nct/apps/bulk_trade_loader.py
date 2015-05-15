@@ -27,7 +27,10 @@ class BulkTradeLoadStatus:
 
     def add_total(self):
         self.total += 1
-        
+      
+    def __repr__(self):
+        return "<BulkLoadStatus: total={}, loaded={}, failed={}, errors={} >".format(self.total, self.loaded,self.failed, self.errors) 
+    
 class RecordProcessor:
     MSG_TYPE = "Msg Type"
     TRADE_ID = "Trade ID"

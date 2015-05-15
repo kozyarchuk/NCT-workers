@@ -16,23 +16,23 @@ def log_decorator(func):
     return func_wrapper
 
 class Deployer:
+    def __init__(self, session_maker = Session):
+        self.session_maker = session_maker
     
-    @classmethod
-    def deploy(cls):
-        cls.update_schema()
-        cls.update_data()
+    def deploy(self):
+        self.update_schema()
+        self.update_data()
     
-    @classmethod
     @log_decorator
-    def update_schema(cls):
-        engine  = Session().get_bind()
+    def update_schema(self):
+        engine = self.session_maker().get_bind()
+        print("Engine", engine)
         Base.metadata.drop_all( engine )
         Base.metadata.create_all( engine )
         
-    @classmethod
     @log_decorator
-    def create_choice_lists(cls):
-        with session_scope() as s:
+    def create_choice_lists(self):
+        with session_scope(self.session_maker) as s:
             s.add(ChoiceList(list_name="Action", value="Buy"))
             s.add(ChoiceList(list_name="Action", value="Sell"))
             s.add(ChoiceList(list_name="InsType", value="Currency"))
@@ -44,10 +44,9 @@ class Deployer:
             s.add(ChoiceList(list_name="EntityType", value="Clearer"))
             s.add(ChoiceList(list_name="EntityType", value="Fund"))
 
-    @classmethod
     @log_decorator
-    def create_entities(cls):
-        with session_scope() as s:
+    def create_entities(self):
+        with session_scope(self.session_maker) as s:
             s.add(Entity(name = 'Clearer1', description = 'Demo Clearer', 
                          type =ChoiceList.find(s, "EntityType", "Clearer")))
             s.add(Entity(name = 'Broker1', description = 'Demo Broker', 
@@ -61,10 +60,9 @@ class Deployer:
             s.add(Entity(name = 'Fund2', description = 'Demo Analyst', 
                          type =ChoiceList.find(s, "EntityType", "Fund")))
 
-    @classmethod
     @log_decorator
-    def create_instruments(cls):
-        with session_scope() as s:
+    def create_instruments(self):
+        with session_scope(self.session_maker) as s:
             usd     = Instrument(name = 'USD', ins_type = ChoiceList.find(s, "InsType", "Currency") )
             usd.currency = usd
             s.add(usd)
@@ -86,10 +84,9 @@ class Deployer:
             s.add(Instrument(name = 'GOOG150508P00530000', ins_type = opt_type, 
                              currency = usd, underlying = googl, exp_date = date(2015,5,8)))
 
-    @classmethod
-    def update_data(cls):
-        cls.create_choice_lists()
-        cls.create_entities()
-        cls.create_instruments()
+    def update_data(self):
+        self.create_choice_lists()
+        self.create_entities()
+        self.create_instruments()
     
         

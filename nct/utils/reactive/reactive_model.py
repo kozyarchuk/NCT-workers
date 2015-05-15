@@ -16,9 +16,6 @@ class ReactiveModel:
         self.s = Session()
         self._domain_objects = self._init_domain_objects()
 
-    def __del__(self):
-        self.s.close()
-        
     def _init_domain_objects(self):
         return {}
     
@@ -38,4 +35,4 @@ class ReactiveModel:
         except:
             self.s.rollback()
             raise
-        
+        self.s.close()

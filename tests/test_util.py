@@ -9,7 +9,7 @@ class TestSchema:
         if not cls.created:
             engine = create_engine('sqlite:///:memory:')
             Session.configure( bind=engine)
-            Deployer.deploy()
+            Deployer().deploy()
             cls.created = True
             
 
