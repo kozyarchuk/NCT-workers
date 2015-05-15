@@ -1,0 +1,12 @@
+* In the current state a single python worker is capable of loading 1K in ~17 seconds on 2.8GH i7
+* Adding in-memory object cache for Portfolios, Instruments, Entity and ChoiceList object, cuts load time to ~4 seconds per 1K trades
+* A test process that loads trades in 1K batches uses ~17MB of RAM
+* The process scales close to linear with number of CPUs. Allowing load rates of ~1400 trades per second on 2.8GH i7 Processor. ( With cache optimization)
+* Replacing SQLAlchemy based Domain Model with Hand-Crafted Cython based Trade Domain Object should cut load time by another 40%.
+
+Conclusion:
+* With above optimizations, we can use this process to load 1M in under 10 minutes.  Granted the domain model is rather rudementary, it's still promising.  
+* Without optimizations, we can load 5K trade file in ~1 minute with very simplistic setup.
+* Optimizations add complexity, and rigidity to the code base and will detract from flexibility speed of development.  Hence, I will omit them for now as performance is sufficient for the foreseeable future.
+
+

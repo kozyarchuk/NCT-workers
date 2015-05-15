@@ -37,6 +37,8 @@ def do_a_bunch():
         s.query(Instrument).get(instr_id)
     s.close()
 
+import sys
+print (sys.version)
 Deployer(LSession).deploy()
 print ("Deployed")
 for _ in range(1):

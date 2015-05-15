@@ -8,9 +8,6 @@ class ReactiveModel:
     PORTFOLIO = 'Portfolio'
     FIELD_DEPENDS = { }
 
-    def __del__(self):
-        self.close()
-        
     @classmethod
     def model_name(cls):
         return str(cls.__name__).replace("Model","")

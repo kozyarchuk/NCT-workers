@@ -1,5 +1,5 @@
 import random
-from _decimal import Decimal
+from decimal import Decimal
 from nct.apps.csv_trade_loader import CSVTradeLoader
 from nct.utils.alch import Session
 from nct.domain.trade import Trade
