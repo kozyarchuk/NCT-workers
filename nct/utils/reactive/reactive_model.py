@@ -8,6 +8,9 @@ class ReactiveModel:
     PORTFOLIO = 'Portfolio'
     FIELD_DEPENDS = { }
 
+    def __del__(self):
+        self.close()
+        
     @classmethod
     def model_name(cls):
         return str(cls.__name__).replace("Model","")
@@ -35,4 +38,7 @@ class ReactiveModel:
         except:
             self.s.rollback()
             raise
-        self.s.close()
+
+    def close(self): 
+        if self.s:
+            self.s.close()

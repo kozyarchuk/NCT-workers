@@ -51,6 +51,7 @@ class CSVTradeLoader(object):
             fields.append(BulkTradeLoadStatus.STATUS_FIELD)
         status = BulkTradeLoader(trades).load()
         self.write_csv(self.error_filepath, fields, status.rejected_trades)
+        return status
         
     
     @classmethod

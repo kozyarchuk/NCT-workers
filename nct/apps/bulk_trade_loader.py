@@ -173,8 +173,9 @@ class BulkTradeLoader:
                 else:
                     status.add_success()
             except Exception as e:
+                import traceback;
+                print (traceback.format_exc())
                 status.add_failure(str(e), record)
-                
         return status 
 
     

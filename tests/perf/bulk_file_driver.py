@@ -32,7 +32,7 @@ if __name__ == "__main__":
     start = time.time()
     file_name = r'c:\temp\bulk_csv{}.csv'.format(random.random())
     for _ in range(100):
-        TetstFileBuilder.build(file_name, 1000)
+        TetstFileBuilder.build(file_name, 1000, 'new')
         run_once()
     print ("Finished in {}.".format(time.time() - start))
 #     run_last()

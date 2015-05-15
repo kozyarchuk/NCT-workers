@@ -7,6 +7,10 @@ class ReactiveFramework:
         self._init_depends_notifty()
         self.model.bind_fields()
    
+    def __del__(self):
+        if self.model:
+            self.model.close()
+
     def _init_depends_notifty(self):
         for field_name, deps in self.model.FIELD_DEPENDS.items():
             for dep_name in deps:
